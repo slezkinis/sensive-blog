@@ -64,7 +64,7 @@ def post_detail(request, slug):
 
     likes = post.likes.all()
 
-    related_tags = post.tags.all().annotate(posts_count=Count('posts', distinct=True))
+    related_tags = post.tags.annotate(posts_count=Count('posts', distinct=True))
 
     serialized_post = {
         'title': post.title,
@@ -107,7 +107,7 @@ def tag_filter(request, tag_title):
             .prefetch_related('author')[:5] \
             .fetch_with_comments_count()
 
-    related_posts = tag.posts.all().prefetch_related(Prefetch('tags', 
+    related_posts = tag.posts.prefetch_related(Prefetch('tags', 
         queryset=Tag.objects.all().annotate(posts_count=Count('posts', distinct=True))
     )).prefetch_related('author')[:20]
     most_popular_posts_ids = [post.id for post in related_posts]
