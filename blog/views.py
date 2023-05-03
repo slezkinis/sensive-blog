@@ -109,14 +109,7 @@ def tag_filter(request, tag_title):
 
     related_posts = tag.posts.prefetch_related(Prefetch('tags', 
         queryset=Tag.objects.all().annotate(posts_count=Count('posts', distinct=True))
-    )).prefetch_related('author')[:20]
-    most_popular_posts_ids = [post.id for post in related_posts]
-    posts_with_comments = \
-        Post.objects.filter(id__in=most_popular_posts_ids).annotate(comments_count=Count('comments'))
-    ids_and_comments = posts_with_comments.values_list('id', 'comments_count')
-    count_for_id = dict(ids_and_comments)
-    for post in related_posts:
-        post.comments_count = count_for_id[post.id]
+    )).prefetch_related('author').fetch_with_comments_count()[:20]
 
     context = {
         'tag': tag.title,
